@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Secret For Three</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Quicksand:wght@400;500;600;700&display=swap');
+
+  :root{
+    --blush: #ffd9e6;
+    --blush-deep: #ff9fc1;
+    --rose: #f65d94;
+    --rose-deep: #c73a72;
+    --cream: #fff5f8;
+    --gold: #e8b978;
+    --ink: #5a2a3f;
+    --shadow: rgba(199, 58, 114, 0.25);
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    font-family: 'Quicksand', sans-serif;
+    background: radial-gradient(circle at 20% 20%, #fff0f5 0%, #ffe1ec 45%, #ffcbdd 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  h1, h2, .display{
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* ---------- floating ambient hearts/sparkles ---------- */
+  #ambient{
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .drift{
+    position: absolute;
+    bottom: -10%;
+    font-size: 1.4rem;
+    opacity: 0.55;
+    animation: floatUp linear infinite;
+    color: var(--rose);
+  }
+  @keyframes floatUp{
+    0%{ transform: translateY(0) rotate(0deg); opacity:0; }
+    10%{ opacity:0.6; }
+    90%{ opacity:0.4; }
+    100%{ transform: translateY(-110vh) rotate(360deg); opacity:0; }
+  }
+
+  /* ---------- credit ---------- */
+  .credit{
+    position: fixed;
+    bottom: 10px;
+    right: 14px;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+    color: var(--rose-deep);
+    opacity: 0.65;
+    z-index: 50;
+    font-family: 'Quicksand', sans-serif;
+    background: rgba(255,255,255,0.5);
+    padding: 3px 9px;
+    border-radius: 20px;
+    backdrop-filter: blur(2px);
+  }
+
+  section{
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+
+  /* ================= LANDING / LOCK PAGE ================= */
+  #landing{
+    text-align: center;
+  }
+  .eyebrow{
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    color: var(--rose-deep);
+    margin-bottom: 18px;
+    opacity: 0.8;
+  }
+  .chest-wrap{
+    width: 190px;
+    height: 190px;
+    margin: 0 auto 28px;
+    position: relative;
+    cursor: pointer;
+    transition: transform .3s ease;
+  }
+  .chest-wrap:hover{ transform: translateY(-4px) scale(1.03); }
+
+  .chest-svg{ width: 100%; height: 100%; filter: drop-shadow(0 18px 24px var(--shadow)); }
+
+  .lock-pulse{
+    animation: pulseGlow 2.2s ease-in-out infinite;
+    transform-origin: center;
+  }
+  @keyframes pulseGlow{
+    0%,100%{ filter: drop-shadow(0 0 0px var(--gold)); }
+    50%{ filter: drop-shadow(0 0 10px var(--gold)); }
+  }
+
+  #landing h1{
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+    color: var(--rose-deep);
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+  #landing p.tagline{
+    max-width: 420px;
+    font-size: 1.02rem;
+    color: var(--ink);
+    opacity: 0.85;
+    margin-bottom: 34px;
+    line-height: 1.6;
+  }
+  .btn{
+    font-family: 'Quicksand', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: linear-gradient(135deg, var(--rose), var(--rose-deep));
+    border: none;
+    padding: 14px 36px;
+    border-radius: 40px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px var(--shadow);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .btn:hover{ transform: translateY(-2px); box-shadow: 0 14px 30px var(--shadow); }
+  .btn:active{ transform: translateY(0px) scale(0.98); }
+
+  /* ================= RIDDLE PAGE ================= */
+  #riddle{ display:none; text-align: center; }
+  .riddle-card{
+    background: rgba(255,255,255,0.75);
+    border: 1px solid rgba(255,255,255,0.9);
+    border-radius: 26px;
+    padding: 46px 34px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 20px 50px var(--shadow);
+    backdrop-filter: blur(6px);
+  }
+  .lock-icon-small{ width: 54px; height:54px; margin: 0 auto 16px; }
+  #riddle h2{
+    color: var(--rose-deep);
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  #riddle p.question{
+    font-size: 1.02rem;
+    line-height: 1.6;
+    margin-bottom: 26px;
+    color: var(--ink);
+  }
+  .hint{
+    font-size: 0.82rem;
+    color: var(--rose-deep);
+    opacity: 0.75;
+    margin-top: 12px;
+    font-style: italic;
+  }
+  input#answer{
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 30px;
+    border: 2px solid var(--blush-deep);
+    outline: none;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1rem;
+    text-align: center;
+    background: #fff;
+    color: var(--ink);
+    margin-bottom: 16px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  input#answer:focus{
+    border-color: var(--rose);
+    box-shadow: 0 0 0 4px rgba(246,93,148,0.15);
+  }
+  #feedback{
+    min-height: 26px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    transition: opacity .2s ease;
+  }
+  #feedback.wrong{ color: #c73a72; }
+  #feedback.correct{ color: #4c9a5a; }
+
+  .shake{ animation: shake .45s; }
+  @keyframes shake{
+    10%,90%{ transform: translateX(-2px); }
+    20%,80%{ transform: translateX(4px); }
+    30%,50%,70%{ transform: translateX(-8px); }
+    40%,60%{ transform: translateX(8px); }
+  }
+
+  /* ================= UNLOCK TRANSITION ================= */
+  #unlockFlash{
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle, #fff 0%, #ffd9e6 60%, transparent 100%);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #unlockFlash.play{
+    animation: flashOut 1s ease forwards;
+  }
+  @keyframes flashOut{
+    0%{ opacity: 0; }
+    35%{ opacity: 1; }
+    100%{ opacity: 0; }
+  }
+
+  .confetti{
+    position: fixed;
+    top: -5%;
+    z-index: 99;
+    border-radius: 2px;
+    pointer-events: none;
+    animation: fall linear forwards;
+  }
+  @keyframes fall{
+    to{ transform: translateY(110vh) rotate(540deg); opacity: 0.9; }
+  }
+
+  /* ================= GIFT / REVEAL PAGE ================= */
+  #gift{
+    display: none;
+    text-align: center;
+    padding-top: 90px;
+    padding-bottom: 100px;
+  }
+  .gift-eyebrow{
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    font-size: 0.68rem;
+    color: var(--rose-deep);
+    opacity: 0.8;
+    margin-bottom: 12px;
+  }
+  #gift h1{
+    font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+    color: var(--rose-deep);
+    margin-bottom: 34px;
+    font-style: italic;
+  }
+
+  .top-photos{
+    display: flex;
+    gap: 22px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 46px;
+  }
+  .top-photos img{
+    width: 250px;
+    max-width: 80vw;
+    border-radius: 18px;
+    box-shadow: 0 16px 34px var(--shadow);
+    border: 6px solid #fff;
+    transform: rotate(-1.5deg);
+    transition: transform .3s ease;
+  }
+  .top-photos img:hover{ transform: scale(1.04) rotate(0deg); }
+
+  .letter{
+    max-width: 640px;
+    text-align: left;
+    background: rgba(255,255,255,0.7);
+    border-radius: 22px;
+    padding: 40px 38px;
+    box-shadow: 0 16px 40px var(--shadow);
+    line-height: 1.85;
+    font-size: 1.03rem;
+    color: var(--ink);
+    margin-bottom: 54px;
+  }
+  .letter p{ margin-bottom: 18px; }
+  .letter strong{ color: var(--rose-deep); }
+  .signoff{
+    text-align: right;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: var(--rose-deep);
+    font-size: 1.15rem;
+    margin-top: 8px;
+  }
+
+  /* ---------- Memory box ---------- */
+  .memory-intro{
+    max-width: 480px;
+    margin-bottom: 20px;
+  }
+  .memory-intro h2{
+    color: var(--rose-deep);
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+  .memory-intro p{
+    font-size: 0.95rem;
+    opacity: 0.8;
+  }
+
+  .chest-btn{
+    margin: 22px 0 40px;
+  }
+
+  .memory-grid{
+    display: none;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+  .memory-card{
+    background: #fff;
+    padding: 10px 10px 16px;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px var(--shadow);
+    opacity: 0;
+    transform: translateY(24px) scale(0.9) rotate(0deg);
+    animation: popIn .55s ease forwards;
+  }
+  .memory-card img{
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+  }
+  @keyframes popIn{
+    to{ opacity: 1; transform: translateY(0) scale(1) rotate(var(--tilt, 0deg)); }
+  }
+
+  .bff-line{
+    display: none;
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1.5rem, 4vw, 2.1rem);
+    color: var(--rose-deep);
+    margin-top: 10px;
+    animation: popIn .7s ease forwards;
+  }
+
+  /* ---------- music toggle ---------- */
+  #musicToggle{
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 60;
+    background: rgba(255,255,255,0.85);
+    border: 1px solid var(--blush-deep);
+    color: var(--rose-deep);
+    border-radius: 50%;
+    width: 46px;
+    height: 46px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 8px 18px var(--shadow);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @media (max-width: 500px){
+    .letter{ padding: 28px 22px; }
+    .riddle-card{ padding: 34px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="ambient"></div>
+<div id="unlockFlash"></div>
+<button id="musicToggle" title="Music on/off">♪</button>
+<audio id="bgSong" src="song.mp3" preload="auto"></audio>
+
+<!-- ================= LANDING PAGE ================= -->
+<section id="landing">
+  <div class="eyebrow">a very small, very secret thing</div>
+  <div class="chest-wrap lock-pulse" onclick="goToRiddle()">
+    <svg class="chest-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="178" rx="70" ry="8" fill="#c73a72" opacity="0.15"/>
+      <path d="M30 90 Q100 55 170 90 L170 150 Q100 175 30 150 Z" fill="url(#chestGrad)" stroke="#c73a72" stroke-width="2"/>
+      <path d="M30 90 Q100 115 170 90 L170 105 Q100 130 30 105 Z" fill="#f65d94" opacity="0.35"/>
+      <path d="M30 90 Q100 55 170 90" fill="none" stroke="#e8b978" stroke-width="3"/>
+      <rect x="90" y="82" width="20" height="26" rx="4" fill="#e8b978" stroke="#c73a72" stroke-width="1.5"/>
+      <circle cx="100" cy="93" r="4.5" fill="#c73a72"/>
+      <rect x="98" y="93" width="4" height="9" fill="#c73a72"/>
+      <path d="M40 100 L40 148" stroke="#e8b978" stroke-width="2" opacity="0.5"/>
+      <path d="M160 100 L160 148" stroke="#e8b978" stroke-width="2" opacity="0.5"/>
+      <defs>
+        <linearGradient id="chestGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffd9e6"/>
+          <stop offset="100%" stop-color="#ff9fc1"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <h1>A secret awaits you</h1>
+  <p class="tagline">but you must find the key first.<br>tap the chest to begin ✨</p>
+  <button class="btn" onclick="goToRiddle()">Find the Key</button>
+</section>
+
+<!-- ================= RIDDLE PAGE ================= -->
+<section id="riddle">
+  <div class="riddle-card">
+    <svg class="lock-icon-small" viewBox="0 0 100 100">
+      <rect x="25" y="45" width="50" height="40" rx="8" fill="#f65d94"/>
+      <path d="M35 45 V32 a15 15 0 0 1 30 0 V45" fill="none" stroke="#c73a72" stroke-width="6"/>
+      <circle cx="50" cy="63" r="6" fill="#fff"/>
+      <rect x="47" y="63" width="6" height="12" fill="#fff"/>
+    </svg>
+    <h2>One little riddle stands in your way</h2>
+    <p class="question">Three names live inside one little group chat &mdash; a group chat with a very sparkly nickname. What are the three names that make up that nickname?</p>
+    <input type="text" id="answer" placeholder="type your answer here..." autocomplete="off" onkeydown="if(event.key==='Enter') checkAnswer()">
+    <div id="feedback"></div>
+    <button class="btn" onclick="checkAnswer()">Unlock It</button>
+    <div class="hint">psst — it's the three of you 💗</div>
+  </div>
+</section>
+
+<!-- ================= GIFT PAGE ================= -->
+<section id="gift">
+  <div class="gift-eyebrow">the vault is open</div>
+  <h1>Here's the real treasure</h1>
+
+  <div class="top-photos">
+    <img src="img1-top.webp" alt="our group">
+  </div>
+
+  <div class="letter">
+    <p>Haneen and Anhar, you are not just my friends — you are the two most precious people in my life. I made this website just so you would know how much I love you both.</p>
+    <p>Haneen, you are the youngest, and truly the most beautiful girl my eyes have ever seen. Anhar, you are just as beautiful, and our friendship has lasted for over <strong>9 years</strong> — the best years of my life. Even though we were separated for 3 years, we never forgot each other. Anhar has been my friend since kindergarten and is the most caring person I know; even though she can get angry sometimes, she has the purest heart. Haneen is completely on my wavelength — we share the exact same mindset! Even though Anhar is a bit different from us, our bond never changes.</p>
+    <p>I always remember back during the national exams when Anhar got upset with us, and Haneen and I were complaining and ranting about it, but we still worked it out and came back even stronger as friends. I love those moments when we walked back together — Anhar would head home, but Haneen would come over to my house. Both of our families love all of us because we've never done anything wrong to make them dislike us.</p>
+    <p>I'm always the spontaneous one who loves to make everyone laugh, especially Anhar when she's not in the mood — Haneen and I always try our best to cheer her up so we can talk and laugh together. Remember when we even raised a cat together for just an hour before my parents put it outside?</p>
+    <p>Even though Haneen and Anhar live close to each other while my house is further away, I used to go visit so we could head to exams together. And when we reunited for the second time in the same class, even after I transferred to another school later on while you two stayed together, nothing came between us — I would still come visit you during break time.</p>
+    <p>At the end of the day, I just want to say: I love you guys so much!</p>
+    <div class="signoff">— Asuma 💗</div>
+  </div>
+
+  <div class="memory-intro">
+    <h2>One more little vault...</h2>
+    <p>a tiny box of memories, just for us three</p>
+  </div>
+
+  <button class="btn chest-btn" onclick="openMemoryBox()">Open the Memory Box</button>
+
+  <div class="memory-grid" id="memoryGrid">
+    <div class="memory-card" style="--tilt:-4deg"><img src="img3-memory.webp" alt="memory"></div>
+    <div class="memory-card" style="--tilt:3deg"><img src="img4-memory.jpg" alt="memory"></div>
+    <div class="memory-card" style="--tilt:-2deg"><img src="img5-memory.jpg" alt="memory"></div>
+    <div class="memory-card" style="--tilt:4deg"><img src="img6-memory.jpg" alt="memory"></div>
+    <div class="memory-card" style="--tilt:-3deg"><img src="img7-memory.jpg" alt="memory"></div>
+    <div class="memory-card" style="--tilt:2deg"><img src="img8-memory.webp" alt="memory"></div>
+    <div class="memory-card" style="--tilt:-5deg"><img src="img9-memory.webp" alt="memory"></div>
+    <div class="memory-card" style="--tilt:3deg"><img src="img10-memory.jpg" alt="memory"></div>
+  </div>
+
+  <div class="bff-line" id="bffLine">Best friends forever! ❤️</div>
+</section>
+
+<div class="credit">Made by Asuma</div>
+
+<script>
+  /* ---------------- ambient floating hearts ---------------- */
+  const ambient = document.getElementById('ambient');
+  const symbols = ['♥','✦','✧','♡'];
+  for(let i=0;i<18;i++){
+    const el = document.createElement('div');
+    el.className = 'drift';
+    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    el.style.left = Math.random()*100 + 'vw';
+    el.style.fontSize = (0.9 + Math.random()*1.4) + 'rem';
+    el.style.animationDuration = (10 + Math.random()*14) + 's';
+    el.style.animationDelay = (Math.random()*14) + 's';
+    ambient.appendChild(el);
+  }
+
+  /* ---------------- music ---------------- */
+  const song = document.getElementById('bgSong');
+  const musicToggle = document.getElementById('musicToggle');
+  const SONG_START = 120;   // 2:00
+  const SONG_END = 249;     // 4:09
+  let musicOn = true;
+
+  song.addEventListener('timeupdate', () => {
+    if (song.currentTime >= SONG_END) {
+      song.currentTime = SONG_START;
+      song.play().catch(()=>{});
+    }
+  });
+
+  function startSong(){
+    song.currentTime = SONG_START;
+    song.play().catch(()=>{});
+    musicToggle.style.display = 'flex';
+  }
+
+  musicToggle.addEventListener('click', () => {
+    if (musicOn){
+      song.pause();
+      musicToggle.textContent = '♪̸';
+    } else {
+      song.play().catch(()=>{});
+      musicToggle.textContent = '♪';
+    }
+    musicOn = !musicOn;
+  });
+
+  /* ---------------- navigation ---------------- */
+  function goToRiddle(){
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('riddle').style.display = 'flex';
+    startSong();
+    document.getElementById('answer').focus();
+  }
+
+  /* ---------------- riddle checking ---------------- */
+  const wrongMessages = [
+    "Nope! The chest just wiggled and stayed shut 😅",
+    "Wrong password... even the lock is judging you right now 👀",
+    "Close, but the treasure chest is not impressed 😂",
+    "Hmm, that key doesn't fit. Try again, detective 🔍",
+    "The vault giggled 'nice try' and locked itself tighter 🔒💕",
+    "Not quite! Think about your group chat name 🥹"
+  ];
+  const correctVariants = {
+    anhar: ['انهار','أنهار','انهر','anhar','anhar'],
+    asmaa: ['اسماء','أسماء','اسما','asmaa','asma','asmaa2','asmaaa'],
+    haneen: ['حنين','هنين','haneen','hanin','haneen2']
+  };
+
+  function normalize(str){
+    return str
+      .toLowerCase()
+      .replace(/[إأآا]/g,'ا')
+      .replace(/ة/g,'ه')
+      .replace(/ى/g,'ي')
+      .replace(/[^a-z\u0600-\u06FF]/g,'');
+  }
+
+  function checkAnswer(){
+    const raw = document.getElementById('answer').value;
+    const norm = normalize(raw);
+    const feedback = document.getElementById('feedback');
+    const card = document.querySelector('.riddle-card');
+
+    const hasAnhar = correctVariants.anhar.some(v => norm.includes(normalize(v)));
+    const hasAsmaa = correctVariants.asmaa.some(v => norm.includes(normalize(v)));
+    const hasHaneen = correctVariants.haneen.some(v => norm.includes(normalize(v)));
+
+    if (hasAnhar && hasAsmaa && hasHaneen){
+      feedback.textContent = "Yes! That's it 💗 opening the vault...";
+      feedback.className = 'correct';
+      setTimeout(unlockVault, 900);
+    } else {
+      feedback.textContent = wrongMessages[Math.floor(Math.random()*wrongMessages.length)];
+      feedback.className = 'wrong';
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+    }
+  }
+
+  /* ---------------- unlock + confetti ---------------- */
+  function unlockVault(){
+    const flash = document.getElementById('unlockFlash');
+    flash.classList.add('play');
+    launchConfetti();
+
+    setTimeout(() => {
+      document.getElementById('riddle').style.display = 'none';
+      document.getElementById('gift').style.display = 'flex';
+      window.scrollTo({top:0, behavior:'instant'});
+    }, 500);
+  }
+
+  function launchConfetti(){
+    const colors = ['#ff9fc1','#f65d94','#ffd9e6','#e8b978','#fff'];
+    for(let i=0;i<60;i++){
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random()*100 + 'vw';
+      c.style.width = c.style.height = (6+Math.random()*7)+'px';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.animationDuration = (2.2+Math.random()*1.6)+'s';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(), 4000);
+    }
+  }
+
+  /* ---------------- memory box ---------------- */
+  function openMemoryBox(){
+    const grid = document.getElementById('memoryGrid');
+    grid.style.display = 'grid';
+    const cards = grid.querySelectorAll('.memory-card');
+    cards.forEach((c,i) => {
+      c.style.animationDelay = (i*0.18)+'s';
+    });
+    event.target.style.display = 'none';
+
+    const totalDelay = cards.length*180 + 500;
+    setTimeout(() => {
+      document.getElementById('bffLine').style.display = 'block';
+    }, totalDelay);
+  }
+</script>
+
+</body>
+</html>
